@@ -93,8 +93,16 @@ handle_messages(Batch) ->
 
 handle_message(Bin) ->
     try
-        Lines = binary:split(Bin, <<"\n">>, [global]),
-        [ parse_line(L) || L <- Lines ],
+        [Header | Lines] = binary:split(Bin, <<"\n">>, [global]),
+	case  binary:split(Header, [<<":">>, <<"|">>], [global]) of
+	    [MsgCount, _Length] ->
+		% new format with length and size
+		MsgCount = length(Lines),
+		[ parse_line(L) || L <- Lines ];
+	    [_Key, _Value, _Type] ->
+		% old format w/o length and size
+		[ parse_line(L) || L <- [Header | Lines] ]
+	end,
         ok
     catch
         error:Why ->
