@@ -97,10 +97,12 @@ handle_message(Bin) ->
 	case  binary:split(Header, [<<":">>, <<"|">>], [global]) of
 	    [MsgCount, _Length] ->
 		% new format with length and size
+		io:format("New format msg ~p~n", [Header]),
 		MsgCount = length(Lines),
 		[ parse_line(L) || L <- Lines ];
 	    [_Key, _Value, _Type] ->
 		% old format w/o length and size
+		io:format("Old format msg~n", []),
 		[ parse_line(L) || L <- [Header | Lines] ]
 	end,
         ok
